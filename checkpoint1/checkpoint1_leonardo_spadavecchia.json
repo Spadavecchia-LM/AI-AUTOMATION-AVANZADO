@@ -1,0 +1,588 @@
+{
+  "name": "CODERHOUSE - Coordinador de Agenda (Consultorio)",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "e8997ce2-3724-4c4f-83fc-db80a03c9fc1",
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        272
+      ],
+      "webhookId": "19471c73-437f-41c1-9cfe-bb2bdabb854a"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "=# ROL\nSos el **Coordinador de Agenda** del consultorio. Tu única función es gestionar los turnos de los pacientes usando la planilla de turnos (Google Sheets) a través de tus herramientas. Hablás en español rioplatense, de forma cordial, breve y clara.\n\n# ÁMBITO\n- Solo gestionás turnos de este consultorio registrados en la planilla.\n- Horario de atención: lunes a viernes de 09:00 a 18:00. Cada turno dura 30 minutos (el último arranca 17:30). No se atiende sábados, domingos ni feriados nacionales de Argentina.\n- Zona horaria: America/Argentina/Buenos_Aires. Fecha y hora actual: {{ $now.setZone('America/Argentina/Buenos_Aires').setLocale('es').toFormat(\"cccc dd/MM/yyyy HH:mm\") }}.\n- Fechas siempre en formato YYYY-MM-DD y horas en HH:MM (24 h) al usar las herramientas. Interpretá \"mañana\", \"el jueves\", etc. a partir de la fecha actual.\n- Herramientas disponibles: Consultar_turnos, Registrar_turno, Actualizar_turno.\n\n# OBJETIVO\nQue cada pedido del usuario termine en uno de estos resultados, sin superposiciones y con datos completos:\n1. Informar disponibilidad de horarios.\n2. Registrar un turno nuevo.\n3. Reprogramar un turno existente.\n4. Cancelar un turno existente.\n\nProcedimiento obligatorio:\n- Antes de cualquier acción, consultá la planilla con Consultar_turnos. Los turnos con Estado \"Cancelado\" no ocupan horario.\n- AGENDAR: pedí los datos que falten (nombre y apellido, teléfono o email, fecha, hora, motivo). Verificá que el horario esté libre y dentro del horario de atención. Mostrá un resumen y pedí confirmación explícita. Recién ahí usá Registrar_turno e informá el ID.\n- REPROGRAMAR: identificá el turno por ID o por nombre + fecha. Si hay más de uno posible, preguntá cuál. Verificá que el nuevo horario esté libre, pedí confirmación y usá Actualizar_turno enviando también los valores actuales de los campos que no cambian.\n- CANCELAR: identificá el turno, pedí confirmación y usá Actualizar_turno con Estado = \"Cancelado\".\n- Si una acción falla, decilo con honestidad. Nunca confirmes un turno que la herramienta no registró.\n\n# REGLAS Y LÍMITES (lo que NO podés hacer)\n- NO das diagnósticos, consejos médicos, ni información sobre tratamientos, estudios o medicamentos.\n- NO borrás filas de la planilla: las cancelaciones se registran cambiando el Estado.\n- NO agendás turnos en el pasado, fuera del horario de atención ni superpuestos con otro turno Confirmado.\n- NO modificás turnos ya Cancelados ni turnos de fechas pasadas.\n- NO revelás datos de otros pacientes (nombre, contacto, motivo). Al informar disponibilidad decí solo \"libre\" u \"ocupado\".\n- NO inventás horarios, IDs ni confirmaciones.\n- NO respondés temas ajenos a la agenda del consultorio; redirigí amablemente.\n- NO hablás de precios, coberturas, obras sociales ni pagos.\n\n# ESCALAMIENTO\n- Si el usuario describe una URGENCIA médica (dolor de pecho, dificultad para respirar, sangrado abundante, pérdida de conocimiento, etc.): indicá que llame de inmediato al 107 (SAME) o al 911, no agendes nada, y agregá la etiqueta [ESCALAR] al final de tu respuesta.\n- Si el pedido está fuera de tus reglas (precios, coberturas, quejas, pedidos de excepción de horario, datos de terceros) o una herramienta falla dos veces seguidas: explicá que derivás el caso a la secretaría del consultorio y agregá la etiqueta [ESCALAR] al final de tu respuesta.\n",
+          "maxIterations": 8,
+          "returnIntermediateSteps": true
+        }
+      },
+      "id": "8d2faa8b-d37e-4e34-b3a8-8bdb658c0293",
+      "name": "Coordinador de Agenda",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        320,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-5-5",
+          "cachedResultName": "Claude Sonnet 5.5",
+          "cachedResultUrl": ""
+        },
+        "options": {
+          "maxTokensToSample": 2048,
+          "temperature": 0.2
+        }
+      },
+      "id": "6cbb3a79-56ad-4b5e-81d1-2ffc64c0b2cd",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        128,
+        560
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "92c220b3-0b0c-4985-ade6-2c0a21da2b2f",
+      "name": "Memoria de la conversación",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Lee TODA la planilla de turnos del consultorio (Google Sheets) y devuelve cada fila con: ID, Fecha (YYYY-MM-DD), Hora (HH:MM), Duracion_min, Paciente, Contacto, Motivo, Estado (Confirmado/Cancelado) y Ultima_modificacion. Usala SIEMPRE como primer paso antes de cualquier otra accion: (1) cuando el usuario pregunta si hay disponibilidad o que horarios estan libres en un dia; (2) antes de registrar un turno nuevo, para verificar que no exista otro turno Confirmado en la misma fecha y hora; (3) cuando el usuario quiere reprogramar o cancelar un turno, para encontrar el ID exacto (buscando por nombre del paciente y/o fecha) y conocer los valores actuales de todos sus campos; (4) cuando el usuario pregunta por su propio turno. Los turnos con Estado 'Cancelado' NO ocupan horario. No requiere parametros. No la uses para preguntas que no tengan relacion con la agenda.",
+        "documentId": {
+          "__rl": true,
+          "value": "1VoB1fark7nG4_50arqTRmZjryPiDvu1jcFgI9sjacyc",
+          "mode": "list",
+          "cachedResultName": "TP1 - Turnos Consultorio (Coordinador de Agenda)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VoB1fark7nG4_50arqTRmZjryPiDvu1jcFgI9sjacyc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 511537601,
+          "mode": "list",
+          "cachedResultName": "turnos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VoB1fark7nG4_50arqTRmZjryPiDvu1jcFgI9sjacyc/edit#gid=511537601"
+        },
+        "options": {}
+      },
+      "id": "98b56fbc-141d-417e-a0d0-7d913ad95c63",
+      "name": "Consultar_turnos",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        464,
+        560
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DFrB1PzaMT5vxEDg",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Agrega UNA fila nueva a la planilla con un turno en estado 'Confirmado'. El ID (formato T-AAMMDDHHMMSS) y la fecha de modificacion se generan solos. Usala UNICAMENTE cuando se cumplan TODAS estas condiciones: (a) ya consultaste la planilla con Consultar_turnos y el horario esta libre; (b) tenes los cinco datos obligatorios: nombre y apellido del paciente, telefono o email, fecha, hora y motivo de consulta; (c) la fecha y hora estan dentro del horario de atencion (lunes a viernes de 09:00 a 18:00) y no estan en el pasado; (d) el usuario confirmo explicitamente el resumen del turno. No la uses para cambiar ni cancelar turnos existentes (para eso esta Actualizar_turno) y nunca la llames dos veces para el mismo pedido. Despues de usarla, informa al usuario el ID devuelto.",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1VoB1fark7nG4_50arqTRmZjryPiDvu1jcFgI9sjacyc",
+          "mode": "list",
+          "cachedResultName": "TP1 - Turnos Consultorio (Coordinador de Agenda)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VoB1fark7nG4_50arqTRmZjryPiDvu1jcFgI9sjacyc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 511537601,
+          "mode": "list",
+          "cachedResultName": "turnos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VoB1fark7nG4_50arqTRmZjryPiDvu1jcFgI9sjacyc/edit#gid=511537601"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hora",
+              "displayName": "Hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Duracion_min",
+              "displayName": "Duracion_min",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Paciente",
+              "displayName": "Paciente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Contacto",
+              "displayName": "Contacto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Motivo",
+              "displayName": "Motivo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ultima_modificacion",
+              "displayName": "Ultima_modificacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "ffbc6bdf-f346-4668-be16-067c1f471ab3",
+      "name": "Registrar_turno",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        640,
+        560
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DFrB1PzaMT5vxEDg",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Modifica una fila EXISTENTE de la planilla, buscandola por su columna ID (ej. T-261105143000). Cubre dos casos de negocio: (1) REPROGRAMAR: el paciente quiere cambiar fecha, hora o motivo de un turno Confirmado; antes verifica con Consultar_turnos que el nuevo horario este libre. (2) CANCELAR: el paciente no puede asistir; envia Estado='Cancelado' (las filas nunca se borran, asi queda historial). IMPORTANTE: esta herramienta sobrescribe todos los campos, asi que envia SIEMPRE los valores actuales de los campos que no cambian (los obtenes de Consultar_turnos). Usala solo cuando el turno esta identificado sin ambiguedad y el usuario confirmo el cambio. No la uses para crear turnos nuevos ni sobre turnos ya Cancelados o de fechas pasadas.",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1VoB1fark7nG4_50arqTRmZjryPiDvu1jcFgI9sjacyc",
+          "mode": "list",
+          "cachedResultName": "TP1 - Turnos Consultorio (Coordinador de Agenda)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VoB1fark7nG4_50arqTRmZjryPiDvu1jcFgI9sjacyc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 511537601,
+          "mode": "list",
+          "cachedResultName": "turnos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VoB1fark7nG4_50arqTRmZjryPiDvu1jcFgI9sjacyc/edit#gid=511537601"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hora",
+              "displayName": "Hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Duracion_min",
+              "displayName": "Duracion_min",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Paciente",
+              "displayName": "Paciente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Contacto",
+              "displayName": "Contacto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Motivo",
+              "displayName": "Motivo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ultima_modificacion",
+              "displayName": "Ultima_modificacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "4bbdca1d-2187-4b90-bbb9-eff2683b2703",
+      "name": "Actualizar_turno",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        800,
+        560
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DFrB1PzaMT5vxEDg",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "leospadavecchia.96@gmail.com",
+        "subject": "={{ $json.output.includes('[ESCALAR]') ? '⚠️ ESCALAR' : '✅ OK' }} · Coordinador de Agenda · {{ ($json.intermediateSteps || []).map(s => s.action.tool).join(', ') || 'sin herramientas' }}",
+        "message": "=<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:760px;color:#1F2937\"><div style=\"background:#0B3D91;color:#FFFFFF;padding:16px 20px\"><h2 style=\"margin:0\">Log de auditoría · Coordinador de Agenda</h2><p style=\"margin:4px 0 0;font-size:13px;color:#C7D7F0\">{{ $now.setZone('America/Argentina/Buenos_Aires').toFormat('dd/MM/yyyy HH:mm') }} · Ejecución {{ $execution.id }} · Sesión {{ $('Chat Trigger').item.json.sessionId }}</p></div><div style=\"padding:16px 20px;border:1px solid #C7D7F0;border-top:none\">{{ $json.output.includes('[ESCALAR]') ? '<p style=\"background:#FFF4E5;border:1px solid #F5A524;padding:8px 12px\"><b>⚠️ Requiere intervención humana</b></p>' : '' }}<h3 style=\"color:#0B3D91;margin-bottom:4px\">Mensaje del usuario</h3><p style=\"margin-top:0\">{{ $('Chat Trigger').item.json.chatInput }}</p><h3 style=\"color:#0B3D91;margin-bottom:4px\">Respuesta del agente</h3><p style=\"margin-top:0;white-space:pre-wrap\">{{ $json.output }}</p><h3 style=\"color:#0B3D91;margin-bottom:4px\">Herramientas ejecutadas ({{ ($json.intermediateSteps || []).length }} de 8 iteraciones máx.)</h3>{{ ($json.intermediateSteps || []).length === 0 ? '<p><em>No se ejecutaron herramientas.</em></p>' : $json.intermediateSteps.map((s, i) => '<div style=\"border-left:4px solid #1E63B5;background:#EEF4FC;padding:10px 14px;margin:10px 0\"><b style=\"color:#0B3D91\">Paso ' + (i + 1) + ': ' + s.action.tool + '</b><div style=\"font-size:12px;color:#334155;margin-top:6px\">Razonamiento / llamada:</div><pre style=\"white-space:pre-wrap;font-size:12px;margin:2px 0\">' + String(s.action.log || '').slice(0, 1000) + '</pre><div style=\"font-size:12px;color:#334155\">Entrada:</div><pre style=\"white-space:pre-wrap;font-size:12px;margin:2px 0\">' + JSON.stringify(s.action.toolInput, null, 2) + '</pre><div style=\"font-size:12px;color:#334155\">Resultado:</div><pre style=\"white-space:pre-wrap;font-size:12px;margin:2px 0\">' + (typeof s.observation === 'string' ? s.observation : JSON.stringify(s.observation)).slice(0, 1500) + '</pre></div>').join('') }}</div></div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "3d8bc84d-0a15-40fd-9dc0-80359d830a22",
+      "name": "Log de auditoría (Gmail)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        720,
+        272
+      ],
+      "webhookId": "79da94a9-c6b4-4227-b70d-d70d2d662cc2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SDBmMun1uQZmUlRL",
+          "name": "leospada96"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "add4ddf3-870e-49e6-aec5-f5c243e83d47",
+              "name": "output",
+              "type": "string",
+              "value": "={{ $('Coordinador de Agenda').item.json.output.replace('[ESCALAR]', '').trim() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4c5af4c1-af32-47c7-97e5-5369bfa0d37d",
+      "name": "Respuesta al chat",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🛡️ Guardrail de seguridad\nAI Agent en modo **Tools Agent** con **Max Iterations = 8** (Options → Max Iterations). Corta cualquier bucle lógico.\n\nSystem Prompt modular: Rol → Ámbito → Objetivo → Reglas y Escalamiento.",
+        "height": 220,
+        "width": 340,
+        "color": 5
+      },
+      "id": "ede05d40-3121-4ab4-8b8b-091ee03cfaae",
+      "name": "Nota Guardrail",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🔧 Herramientas laterales (Google Sheets Tool)\nConectadas al puerto **Tool** del agente, no al flujo principal. Cada una tiene una *Description* extensa que le indica al modelo cuándo activarla.",
+        "height": 140,
+        "width": 520,
+        "color": 5
+      },
+      "id": "e9cc2ac9-0d20-4986-b0b9-6062f4428f3c",
+      "name": "Nota Herramientas",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        752
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📋 Observabilidad\nGmail envía el *Execution Log*: mensaje, respuesta, herramientas usadas, entradas, resultados y razonamiento. Marca ⚠️ si el agente escaló.",
+        "height": 220,
+        "width": 340,
+        "color": 5
+      },
+      "id": "8e9f8572-ba7f-4be7-9b11-aaffe506dc56",
+      "name": "Nota Observabilidad",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        672,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "Coordinador de Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Coordinador de Agenda": {
+      "main": [
+        [
+          {
+            "node": "Log de auditoría (Gmail)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log de auditoría (Gmail)": {
+      "main": [
+        [
+          {
+            "node": "Respuesta al chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Coordinador de Agenda",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memoria de la conversación": {
+      "ai_memory": [
+        [
+          {
+            "node": "Coordinador de Agenda",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar_turnos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Coordinador de Agenda",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar_turno": {
+      "ai_tool": [
+        [
+          {
+            "node": "Coordinador de Agenda",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar_turno": {
+      "ai_tool": [
+        [
+          {
+            "node": "Coordinador de Agenda",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respuesta al chat": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "49b5a382-4b28-4242-9d1c-5381e38f7387",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f4af2ac8717e153a7a035e190ea3c477922effa59a106fd72ceb63a5337616b3"
+  },
+  "nodeGroups": [],
+  "id": "YkM8XNuIpqA6wYoB",
+  "tags": []
+}
