@@ -1,0 +1,1260 @@
+{
+  "name": "checkpoint4_Leonardo_Spadavecchia",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "readStatus": "unread"
+        },
+        "options": {}
+      },
+      "id": "2bf450f0-6d09-42d3-861f-593cf973415c",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        240
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SDBmMun1uQZmUlRL",
+          "name": "leospada96"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "23dde36e-779b-4196-b2db-fac535c6ec79",
+              "leftValue": "={{ ($json.subject ?? '').toLowerCase() }}",
+              "rightValue": "auto-reply",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "bc1089f9-81e6-4f28-a61f-2d1c2ce7738a",
+              "leftValue": "={{ ($json.subject ?? '').toLowerCase() }}",
+              "rightValue": "autoreply",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "099e3e24-d634-44e1-851d-79c16f44a69a",
+              "leftValue": "={{ ($json.subject ?? '').toLowerCase() }}",
+              "rightValue": "automatic reply",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "8148ac13-31ad-4676-a3bc-75805684e2b3",
+              "leftValue": "={{ ($json.subject ?? '').toLowerCase() }}",
+              "rightValue": "out of office",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "01d0d33c-488e-4e80-a6b0-c62d156e7bc5",
+              "leftValue": "={{ ($json.subject ?? '').toLowerCase() }}",
+              "rightValue": "undeliverable",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "d41a18fa-66f8-4453-99e0-0c929f690153",
+              "leftValue": "={{ ($json.subject ?? '').toLowerCase() }}",
+              "rightValue": "delivery status notification",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "3d41df16-5ce2-4384-8122-2d864d15fded",
+              "leftValue": "={{ ($json.subject ?? '').toLowerCase() }}",
+              "rightValue": "respuesta automática",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "c1d40833-3fa0-4f4a-9f2b-1fda5ed12dce",
+              "leftValue": "={{ ($json.subject ?? '').toLowerCase() }}",
+              "rightValue": "respuesta automatica",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "3e8665b9-874f-4aff-81d8-b5f4604ce7bb",
+              "leftValue": "={{ ($json.subject ?? '').toLowerCase() }}",
+              "rightValue": "fuera de la oficina",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "7e176594-b9ce-4f21-813e-c453bb149c8a",
+              "leftValue": "={{ ($json.from?.value?.[0]?.address ?? '').toLowerCase() }}",
+              "rightValue": "no-reply",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "04a44970-4fc4-40f3-a8c0-54cc2f061b14",
+              "leftValue": "={{ ($json.from?.value?.[0]?.address ?? '').toLowerCase() }}",
+              "rightValue": "noreply",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "d7e07300-e217-49a5-938b-cb42be4db282",
+              "leftValue": "={{ ($json.from?.value?.[0]?.address ?? '').toLowerCase() }}",
+              "rightValue": "mailer-daemon",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "5c724780-aeb5-43f4-a06d-79b39f343b6e",
+              "leftValue": "={{ ($json.from?.value?.[0]?.address ?? '').toLowerCase() }}",
+              "rightValue": "postmaster",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "id": "eb87ee34-8bb2-4116-a5f6-0af83dcbc697",
+      "name": "¿Es auto-reply?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        240
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "844806b0-9727-4d76-8e1b-d4e86ca464c3",
+      "name": "Ignorar (corta el bucle)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        448,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6111aa23-3388-4363-896c-86f38f588339",
+              "name": "email",
+              "value": "={{ ($json.from?.value?.[0]?.address ?? '').toLowerCase().trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "56e77259-4c98-4fb5-b32c-944bca964c7a",
+              "name": "nombre_remitente",
+              "value": "={{ $json.from?.value?.[0]?.name ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "5c89a198-619f-4a56-81c9-f079b822a255",
+              "name": "asunto",
+              "value": "={{ $json.subject || '(sin asunto)' }}",
+              "type": "string"
+            },
+            {
+              "id": "dd15206f-11b8-4311-b798-d86d3649b5bf",
+              "name": "cuerpo",
+              "value": "={{ ($json.text ?? '').slice(0, 3000) }}",
+              "type": "string"
+            },
+            {
+              "id": "c206fa50-da4f-40f3-8a32-434a331bf4b9",
+              "name": "thread_id",
+              "value": "={{ $json.threadId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "954bc1c7-1b88-4619-be29-16622e6f7cc2",
+      "name": "Limpiar payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "230be8d8-b1da-4a6d-bc9c-de3e1dd9f863",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "57c0826a-1800-4681-9b33-a6238917af97",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "79223add-70ea-4f50-90fe-e2339fe37fc0",
+      "name": "Validar email",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Remitente: {{ $json.nombre_remitente }} <{{ $json.email }}>\nAsunto: {{ $json.asunto }}\n\nCuerpo del email:\n{{ $json.cuerpo }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Sos el asistente del equipo comercial de una distribuidora mayorista de consumo masivo en Buenos Aires.\nRecibís un email de un cliente o prospecto y tenés que:\n1. Clasificarlo en UNA categoría: \"Pedido\", \"Consulta comercial\", \"Reclamo\", \"Logística\" u \"Otro\".\n2. Asignar prioridad: \"alta\" (reclamos o pedidos urgentes), \"media\" o \"baja\".\n3. Extraer nombre, apellido y empresa SOLO si aparecen en el email o la firma. Si no aparecen, devolvé \"\".\n4. Escribir un resumen de una oración.\n5. Redactar un borrador de respuesta en español rioplatense, cordial y profesional, firmado como \"Equipo Comercial\".\n\nReglas:\n- No inventes precios, stock, fechas de entrega, descuentos ni aprobaciones. Si el cliente pide algo que no sabés, respondé que lo vas a confirmar a la brevedad.\n- El borrador lo revisa una persona antes de enviarse: no prometas nada que requiera autorización.\n- Respondé únicamente con el JSON pedido."
+        }
+      },
+      "id": "1cb9a542-a8e9-403a-99bf-054a75047feb",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        880,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-haiku-5-5"
+        },
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "d2a50269-b83b-4997-9f87-3701717696f0",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        832,
+        560
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "pEGNiUpH1pDcd1t7",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"categoria\": \"Pedido\",\n  \"prioridad\": \"media\",\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"empresa\": \"Almacén Don Pepe\",\n  \"resumen\": \"El cliente solicita el pedido semanal habitual.\",\n  \"respuesta_borrador\": \"Hola Juan, gracias por escribirnos. ...\"\n}"
+      },
+      "id": "ef8026f1-980c-48a6-b1b5-aa21a83bf419",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "281d8f1e-bd64-4ec0-bbc9-9b4fe4709273",
+              "name": "email",
+              "value": "={{ $('Validar email').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "8ba125f3-900f-4926-affb-cbc390e4d8b5",
+              "name": "nombre",
+              "value": "={{ $json.output.nombre || $('Validar email').item.json.nombre_remitente.split(' ')[0] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "7a569203-ab22-4c9b-9037-9fa4a9b09d31",
+              "name": "apellido",
+              "value": "={{ $json.output.apellido || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "89141f5a-3310-4df4-b63e-30794b6f2b1a",
+              "name": "empresa",
+              "value": "={{ $json.output.empresa || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "d3c6631c-ed42-40ff-9399-9195a813fb2b",
+              "name": "asunto",
+              "value": "={{ $('Validar email').item.json.asunto }}",
+              "type": "string"
+            },
+            {
+              "id": "b2dabb8f-472f-4541-93fd-9b230e7fe4ed",
+              "name": "thread_id",
+              "value": "={{ $('Validar email').item.json.thread_id }}",
+              "type": "string"
+            },
+            {
+              "id": "a424cf91-c095-4080-b09e-51a0f265ffef",
+              "name": "categoria",
+              "value": "={{ $json.output.categoria }}",
+              "type": "string"
+            },
+            {
+              "id": "329c96a4-dfa7-49e8-9346-f2c5ae1312b4",
+              "name": "prioridad",
+              "value": "={{ $json.output.prioridad }}",
+              "type": "string"
+            },
+            {
+              "id": "6a1a13a5-2a5f-4887-894a-df29addf7ad7",
+              "name": "resumen",
+              "value": "={{ $json.output.resumen }}",
+              "type": "string"
+            },
+            {
+              "id": "c236d343-958f-48a3-84c3-0c662d60e425",
+              "name": "respuesta_borrador",
+              "value": "={{ $json.output.respuesta_borrador }}",
+              "type": "string"
+            },
+            {
+              "id": "28ba469a-007e-465e-a717-f6e7c2936048",
+              "name": "fecha_hoy",
+              "value": "={{ $now.setZone('America/Argentina/Buenos_Aires').toFormat('yyyy-MM-dd') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "355a5836-8de2-4455-8a60-b886d3db0c8e",
+      "name": "Preparar registro CRM",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1248,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1GBMrdLIyz0VYxTsTjQg1IVdBXXM541pJwU1Jbhn9MPI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "clientes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GBMrdLIyz0VYxTsTjQg1IVdBXXM541pJwU1Jbhn9MPI/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "email",
+              "lookupValue": "={{ $json.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f38f7f57-e664-4a44-9121-4013c6b3ff24",
+      "name": "Look up cliente",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1472,
+        464
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DFrB1PzaMT5vxEDg",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "email",
+        "joinMode": "enrichInput1",
+        "options": {}
+      },
+      "id": "27b34cda-a5b1-4f09-8287-6f75d28ac275",
+      "name": "Merge datos CRM",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1680,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "57fa2be5-1d4c-434f-8be0-372c31cef483",
+              "leftValue": "={{ $json.row_number }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "dca87875-0dea-4737-a3b8-155164fae3f8",
+      "name": "¿Existe en CRM?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1904,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1GBMrdLIyz0VYxTsTjQg1IVdBXXM541pJwU1Jbhn9MPI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "clientes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GBMrdLIyz0VYxTsTjQg1IVdBXXM541pJwU1Jbhn9MPI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $json.email }}",
+            "ultimo_contacto": "={{ $json.fecha_hoy }}",
+            "ultimo_asunto": "={{ $json.asunto }}",
+            "categoria_ia": "={{ $json.categoria }}"
+          },
+          "matchingColumns": [
+            "email"
+          ],
+          "schema": [
+            {
+              "id": "id_cliente",
+              "displayName": "id_cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "apellido",
+              "displayName": "apellido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "empresa",
+              "displayName": "empresa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ciudad",
+              "displayName": "ciudad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "provincia",
+              "displayName": "provincia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "segmento",
+              "displayName": "segmento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha_alta",
+              "displayName": "fecha_alta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ultimo_contacto",
+              "displayName": "ultimo_contacto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ultimo_asunto",
+              "displayName": "ultimo_asunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "categoria_ia",
+              "displayName": "categoria_ia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "notas",
+              "displayName": "notas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "b4061524-44a0-4a5f-959a-ec0201617fcd",
+      "name": "Update contacto",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2128,
+        240
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DFrB1PzaMT5vxEDg",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1GBMrdLIyz0VYxTsTjQg1IVdBXXM541pJwU1Jbhn9MPI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "clientes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GBMrdLIyz0VYxTsTjQg1IVdBXXM541pJwU1Jbhn9MPI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id_cliente": "={{ 'CLI-' + $now.toFormat('yyMMddHHmmss') + '-' + $itemIndex }}",
+            "nombre": "={{ $json.nombre }}",
+            "apellido": "={{ $json.apellido }}",
+            "email": "={{ $json.email }}",
+            "empresa": "={{ $json.empresa }}",
+            "estado": "Lead",
+            "fecha_alta": "={{ $json.fecha_hoy }}",
+            "ultimo_contacto": "={{ $json.fecha_hoy }}",
+            "ultimo_asunto": "={{ $json.asunto }}",
+            "categoria_ia": "={{ $json.categoria }}",
+            "notas": "Alta automática desde email"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_cliente",
+              "displayName": "id_cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "apellido",
+              "displayName": "apellido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "empresa",
+              "displayName": "empresa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ciudad",
+              "displayName": "ciudad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "provincia",
+              "displayName": "provincia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "segmento",
+              "displayName": "segmento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_alta",
+              "displayName": "fecha_alta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ultimo_contacto",
+              "displayName": "ultimo_contacto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ultimo_asunto",
+              "displayName": "ultimo_asunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "categoria_ia",
+              "displayName": "categoria_ia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notas",
+              "displayName": "notas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "16ef8bd0-0b07-4888-ae60-2597e3f99d92",
+      "name": "Crear contacto",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2128,
+        448
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DFrB1PzaMT5vxEDg",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $('Merge datos CRM').item.json.asunto.toLowerCase().startsWith('re:') ? $('Merge datos CRM').item.json.asunto : 'Re: ' + $('Merge datos CRM').item.json.asunto }}",
+        "message": "={{ $('Merge datos CRM').item.json.respuesta_borrador }}",
+        "options": {
+          "threadId": "={{ $('Merge datos CRM').item.json.thread_id }}",
+          "sendTo": "={{ $('Merge datos CRM').item.json.email }}"
+        }
+      },
+      "id": "3d8772ef-cac6-4b70-bb01-2af3f0bfc249",
+      "name": "Crear borrador (HITL)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2352,
+        352
+      ],
+      "webhookId": "7353b998-53d4-4b02-9059-d71f868cf5f4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SDBmMun1uQZmUlRL",
+          "name": "leospada96"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "12f5d886-5848-48a7-a260-cd896e5a3e82",
+              "name": "mensaje",
+              "value": "=📩 Borrador pendiente de aprobación\n\nDe: {{ $('Merge datos CRM').item.json.nombre }} <{{ $('Merge datos CRM').item.json.email }}>\nEmpresa: {{ $('Merge datos CRM').item.json.empresa || '-' }}\nAsunto: {{ $('Merge datos CRM').item.json.asunto.slice(0, 120) }}\nCategoría: {{ $('Merge datos CRM').item.json.categoria }} | Prioridad: {{ $('Merge datos CRM').item.json.prioridad }}\nCRM: {{ $('Merge datos CRM').item.json.row_number ? 'contacto existente actualizado' : 'contacto nuevo creado' }}\n\nResumen: {{ ($('Merge datos CRM').item.json.resumen || '').slice(0, 300) }}\n\nRevisá la carpeta Borradores de Gmail para aprobar y enviar.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6c2a3bd5-94bc-42ab-a0d1-a97b0a36d4ed",
+      "name": "Payload Telegram",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2560,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "8821741721",
+        "text": "={{ $json.mensaje }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "d7ccd9d7-e53e-4270-98a9-9e7891388f14",
+      "name": "Notificar equipo",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2784,
+        352
+      ],
+      "webhookId": "78fe1880-9fbe-4fe4-8f57-fbf8eac00b01",
+      "credentials": {
+        "telegramApi": {
+          "id": "jWdpU81Q2A0NIWcp",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## ① Anti bucle\nIgnora auto-replies, out of office, rebotes y casillas no-reply.",
+        "height": 180,
+        "color": 5
+      },
+      "id": "e4832aa2-313f-4b66-bcd4-d001e489f514",
+      "name": "Nota 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## ④ Limpieza y validación\nDeja solo email, nombre, asunto, cuerpo (máx 3000 caracteres) y threadId. El Filter descarta emails vacíos o mal formados (evita el 400).",
+        "height": 200,
+        "width": 460,
+        "color": 5
+      },
+      "id": "839e646f-1171-4109-9ebf-a4606f7c89d7",
+      "name": "Nota 4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        336,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## ② Look up antes de Create\nBusca el email en la hoja *clientes*. Si existe actualiza, si no crea. Evita duplicados (el equivalente al 409 en un CRM real).",
+        "height": 220,
+        "width": 660,
+        "color": 5
+      },
+      "id": "0255c7a0-853c-4113-a1be-be1d1f1afb6f",
+      "name": "Nota 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## ③ Human-in-the-loop\nSolo crea un BORRADOR. Nada se envía sin que una persona lo apruebe desde Gmail.",
+        "height": 200,
+        "width": 220,
+        "color": 5
+      },
+      "id": "1b381896-221a-4ea4-b613-321bec829823",
+      "name": "Nota 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2304,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Set antes de mensajería\nArma un texto corto para Telegram, sin HTML ni binarios.",
+        "height": 200,
+        "width": 460,
+        "color": 5
+      },
+      "id": "e55c08ac-81aa-445b-b23c-d5514a2b829f",
+      "name": "Nota 5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2528,
+        128
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "¿Es auto-reply?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es auto-reply?": {
+      "main": [
+        [
+          {
+            "node": "Ignorar (corta el bucle)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Limpiar payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpiar payload": {
+      "main": [
+        [
+          {
+            "node": "Validar email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar email": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Preparar registro CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar registro CRM": {
+      "main": [
+        [
+          {
+            "node": "Merge datos CRM",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Look up cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Look up cliente": {
+      "main": [
+        [
+          {
+            "node": "Merge datos CRM",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge datos CRM": {
+      "main": [
+        [
+          {
+            "node": "¿Existe en CRM?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Existe en CRM?": {
+      "main": [
+        [
+          {
+            "node": "Update contacto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Crear contacto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update contacto": {
+      "main": [
+        [
+          {
+            "node": "Crear borrador (HITL)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear contacto": {
+      "main": [
+        [
+          {
+            "node": "Crear borrador (HITL)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear borrador (HITL)": {
+      "main": [
+        [
+          {
+            "node": "Payload Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Payload Telegram": {
+      "main": [
+        [
+          {
+            "node": "Notificar equipo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "aa87613c-1d71-44d5-b107-3f6007c669ae",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f4af2ac8717e153a7a035e190ea3c477922effa59a106fd72ceb63a5337616b3"
+  },
+  "nodeGroups": [],
+  "id": "XL8HDMcOuJB3ETI8",
+  "tags": []
+}
