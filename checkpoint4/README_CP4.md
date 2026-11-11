@@ -2,7 +2,7 @@
 
 **Autor:** Leonardo Spadavecchia
 **Herramienta:** n8n
-**Blueprint:** `2026-11-11_workflow_cerebro_agentico_n8n.json`
+**Blueprint:** `checkpoint4_Leonardo_Spadavecchia`
 
 ## Descripción
 
@@ -14,7 +14,7 @@ El workflow recibe emails entrantes y descarta respuestas automáticas para no g
 |---|---|---|
 | CRM | Google Sheets (hoja `clientes`) | Lectura: buscar contacto por email. Escritura: actualizar o agregar fila |
 | Casilla de correo | Gmail | Lectura: emails no leídos. Escritura: solo crear borradores |
-| Canal del equipo | Telegram | Escritura: mensaje a un único chat |
+| Canal del equipo | Telegram | Escritura: mensaje a un único chat con el resumen del borrador creado |
 | Modelo de IA | Anthropic (Claude) | Clasificación y redacción con salida estructurada |
 
 Elegí Google Sheets como CRM y Telegram como canal del equipo porque facilitan las pruebas. El diseño se traslada a HubSpot, Pipedrive o Slack cambiando solo los nodos de conexión.
@@ -87,8 +87,8 @@ Los emails usan los dominios reservados `example.com`, `example.org` y `example.
    - Google Sheets OAuth2: `Look up cliente`, `Update contacto` y `Crear contacto`.
    - Anthropic: `Anthropic Chat Model` (elegir el modelo desde el desplegable).
    - Telegram: `Notificar equipo`.
-3. Apuntar los tres nodos de Sheets a una hoja propia con las mismas columnas. El blueprint referencia la hoja de prueba del autor.
-4. Reemplazar `TU_CHAT_ID` en `Notificar equipo`.
+3. Apuntar los tres nodos de Sheets a una hoja propia con las mismas columnas (dejo copia del archivo que use para el que no quiera crear uno nuevo). El blueprint referencia la hoja de prueba del autor.
+4. Reemplazar `TU_CHAT_ID` en `Notificar equipo` (nodo telegram).
 5. Verificar que todas las credenciales queden en verde.
 
 ## Plan de pruebas

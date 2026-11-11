@@ -955,7 +955,7 @@
     },
     {
       "parameters": {
-        "chatId": "8821741721",
+        "chatId": "TU_CHAT_ID",
         "text": "={{ $json.mensaje }}",
         "additionalFields": {
           "appendAttribution": false
@@ -1249,7 +1249,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "aa87613c-1d71-44d5-b107-3f6007c669ae",
+  "versionId": "a006062c-7d07-47a5-97e0-bed1e42217e8",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f4af2ac8717e153a7a035e190ea3c477922effa59a106fd72ceb63a5337616b3"
